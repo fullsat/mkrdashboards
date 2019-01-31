@@ -1,0 +1,32 @@
+title: えびばでぃれっつごー
+urlPath: after_school_climax_girl
+memo: viva after school yeah yeah
+widget_params:
+    - type: header
+      markdowns:
+        - 自由
+        - 6時間
+        - 3日間
+        - 1ヶ月
+    - type: role
+      roleFullname: lab:web
+      name: custom.multicore.loadavg_per_core.loadavg5
+      isStacked: false
+    - type: host
+      roleFullname: lab:web
+      name: memory
+    - type: host
+      roleFullname: lab:web
+      name: disk
+    - type: role
+      roleFullname: lab:elb
+      name: custom.alb.request.count
+    - type: role
+      roleFullname: lab:elb
+      name: custom.alb.httpcode_count.alb_5xx
+    - type: host
+      roleFullname: lab:web
+      name: custom.ec2.network.*
+    - type: host
+      roleFullname: lab:web
+      name: custom.linux.ss.*
