@@ -1,0 +1,38 @@
+version: 2.1
+executors:
+  ruby19:
+    docker:
+      - image: ruby:1.9.3
+  ruby20:
+    docker:
+      - image: ruby:2.0
+  ruby25:
+    docker:
+      - image: ruby:2.5
+jobs:
+  test-on-ruby19:
+    executor: ruby19
+    steps:
+      - checkout
+      - run: bundle install
+      - run: bundle exec rspec
+  test-on-ruby20:
+    executor: ruby20
+    steps:
+      - checkout
+      - run: bundle install
+      - run: bundle exec rspec
+  test-on-ruby25:
+    executor: ruby25
+    steps:
+      - checkout
+      - run: bundle install
+      - run: bundle exec rspec
+
+workflows:
+  version: 2.1
+  test-with-many-versions:
+    jobs:
+      - test-on-ruby19
+      - test-on-ruby20
+      - test-on-ruby25

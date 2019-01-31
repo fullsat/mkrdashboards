@@ -1,0 +1,4 @@
+.env
+/config.yml
+*/conf.d/
+.rspec_status
