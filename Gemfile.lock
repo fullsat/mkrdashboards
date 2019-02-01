@@ -4,6 +4,7 @@ GEM
     dotenv (2.4.0)
     faraday (0.13.1)
       multipart-post (>= 1.2, < 3)
+    json (2.1.0)
     multipart-post (2.0.0)
 
 PLATFORMS
@@ -12,6 +13,7 @@ PLATFORMS
 DEPENDENCIES
   dotenv
   faraday
+  json
 
 BUNDLED WITH
    1.15.4

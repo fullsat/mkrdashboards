@@ -2,43 +2,95 @@ require 'dotenv'
 require 'yaml'
 require 'json'
 require 'faraday'
-require 'pp'
 
 Dotenv.load
-puts ENV['MACKEREL_APIKEY']
 
 module Mackerel
-
-  class Client
-    def create_dashboard(payload)
+  class ObjectCache
+    @@hash_objects = {}
+    def self.write(key, object)
+      @@hash_objects[key] = object
     end
 
-    def get_hosts_in_role(role_fullname)
-      hosts = {
-        "hosts" => [
-          {
-            "id" => "ididididid",
-            "status" => "working",
-            "memo" => "hogehogenomemo",
-            "roles" => {"lab" => "web"}
-          }
-        ]
-      }
+    def self.read(key)
+      @@hash_objects[key]
+    end
+  end
 
-      hosts["hosts"].select{|host| host["roles"].map{|s, r| "#{s}:#{r}"}.include?(role_fullname) }
+  class Client
+    ENDPOINT = "https://api.mackerelio.com/"
+
+    def create_dashboard(payload)
+      res = connection.post do |req|
+        req.url '/api/v0/dashboards'
+        req.headers['X-Api-Key'] = ENV['MACKEREL_APIKEY']
+        req.headers['Content-Type'] = 'application/json'
+        req.body = payload
+      end
+      res.body
+    end
+
+    def delete_dashboard(dashboard_id)
+      res = connection.delete do |req|
+        req.url "/api/v0/dashboards/#{dashboard_id}"
+        req.headers['X-Api-Key'] = ENV['MACKEREL_APIKEY']
+        req.headers['Content-Type'] = 'application/json'
+      end
+      res.body
+    end
+
+    def search_dashboard_id_by_urlpath(url_path)
+      dashboards = ObjectCache::read('dashboards')
+      if dashboards.nil?
+        res = connection.get do |req|
+          req.url '/api/v0/dashboards'
+          req.headers['X-Api-Key'] = ENV['MACKEREL_APIKEY']
+          req.headers['Content-Type'] = 'application/json'
+        end
+        dashboards = JSON.parse(res.body)
+        ObjectCache::write('dashboards', dashboards)
+      end
+
+      ids = dashboards["dashboards"].select{|d| d["urlPath"] == url_path }.map{|d| d["id"]}
+      ids.first
+    end
+
+    def list_hosts_with_role(role_fullname)
+      res = connection.get do |req|
+          req.url '/api/v0/hosts'
+          req.headers['X-Api-Key'] = ENV['MACKEREL_APIKEY']
+          req.headers['Content-Type'] = 'application/json'
+          req.params['status'] = ["working", "standby", "maintenance", "poweroff"]
+      end
+      hosts = JSON.parse(res.body)
+      hosts["hosts"].select! do |host|
+        host["roles"].map do |s, roles|
+          roles.map{|r| "#{s}:#{r}"}
+        end.flatten.include?(role_fullname)
+      end
+    end
+
+    def connection
+      @conn ||= Faraday::Connection.new(:url => ENDPOINT) do |builder|
+        builder.use Faraday::Request::UrlEncoded
+        builder.use Faraday::Adapter::NetHttp
+        builder.options.params_encoder = Faraday::FlatParamsEncoder
+      end
     end
   end
 
   class BulkDashboardMaker
     def load_config
-      @yaml = YAML.load_file("config.tmpl.yml")
+      @yaml = YAML.load_file("config.yml")
     end
 
     def bulk_create
       load_config
+      client = Client.new
+      old_id = client.search_dashboard_id_by_urlpath(@yaml['urlPath'])
+      client.delete_dashboard(old_id) unless old_id.nil?
       payload = Dashboard.new.build(@yaml)
-      puts payload
-      Client.new.create_dashboard(payload)
+      client.create_dashboard(payload)
     end
   end
 
@@ -49,13 +101,14 @@ module Mackerel
     attr_reader :widgets
 
     def build(yaml)
-      @title   = yaml["title"]
-      @urlPath = yaml["urlPath"]
-      @memo    = yaml["memo"]
+      @title   = yaml["title"] || ""
+      @urlPath = yaml["urlPath"] || "error"
+      @memo    = yaml["memo"] || ""
       @widgets = []
-      y = 0
-      wgf = WidgetGroupFactory.new
 
+      y = 0
+
+      wgf = WidgetGroupFactory.new
       yaml["widget_params"].each do |param, i|
         group = wgf.create(param["type"])
         group.build(y, param).each do |widget|
@@ -64,6 +117,10 @@ module Mackerel
         y += group.height
       end
 
+      self.to_json
+    end
+
+    def to_json
       {
         "title" => self.title,
         "urlPath" => self.urlPath,
@@ -87,12 +144,18 @@ module Mackerel
     MAX_COLUMN = 24
     attr_reader :row
 
-    def build(y, param); end
+    def build(y, param)
+    end
+
     def max_width
       (MAX_COLUMN / ranges.size).to_i
     end
 
     def height
+      6 #default
+    end
+
+    def row_height
       6 #All type adopted
     end
 
@@ -100,7 +163,7 @@ module Mackerel
       {
         "x" => max_width * i,
         "y" => y,
-        "height" => height,
+        "height" => row_height,
         "width" => 6
       }
     end
@@ -108,9 +171,9 @@ module Mackerel
     def ranges
       @ranges ||= [
         {},
-        {"type" => "relative", "period" => "21600", "offset" => "0"},
-        {"type" => "relative", "period" => "259200", "offset" => "0"},
-        {"type" => "relative", "period" => "2592000", "offset" => "0"}
+        {"type" => "relative", "period" => 21600, "offset" => 0},
+        {"type" => "relative", "period" => 259200, "offset" => 0},
+        {"type" => "relative", "period" => 2592000, "offset" => 0}
       ]
     end
   end
@@ -120,6 +183,7 @@ module Mackerel
       param['markdowns'].map.with_index do |mkd, i|
         {
           "type" => "markdown",
+          "title" => "",
           "layout" => make_layout(y, i),
           "markdown" => mkd
         }
@@ -129,53 +193,74 @@ module Mackerel
     def height
       2
     end
+
+    def row_height
+      2
+    end
   end
 
   class RoleGroup < WidgetGroup
     def build(y, param)
       ranges.map.with_index do |range, i|
-        {
+        _tmp_obj = {
           "type" => "graph",
+          "title" => "",
           "layout" => make_layout(y, i),
           "graph" => param,
-          "range" => range,
         }
+        _tmp_obj['range'] = range unless range.empty?
+        _tmp_obj
       end
     end
 
     def height
       6
     end
+    def row_height
+      6
+    end
   end
 
   class HostGroup < WidgetGroup
-    HEIGHT = 6
     def build(y, param)
       get_host_ids(param['roleFullname']).map.with_index do |id, i|
         ranges.map.with_index do |range, j|
-          {
+          _tmp_obj = {
             "type" => "graph",
+            "title" => "",
             "layout" => make_layout(y + HEIGHT * i, j),
             "graph" => {
               "type" => "host",
               "hostId" => id,
               "name" => param["name"]
-            },
-            "range" => range,
+            }
           }
+          _tmp_obj['range'] = range unless range.empty?
+          _tmp_obj
         end
       end.flatten
     end
 
+    HEIGHT = 6
     def height
-      @ids.nil? ? get_host_ids * HEIGHT : @ids.size * HEIGHT
+      @ids.nil? ? raise("Please call after #get_host_ids") : @ids.size * HEIGHT
+    end
+
+    def row_height
+      HEIGHT
     end
 
     def get_host_ids(role_fullname)
-      hosts = Client.new.get_hosts_in_role(role_fullname)
-      @ids = hosts.map{|host| host['id']}
+      @ids = ObjectCache::read(role_fullname)
+      if @ids.nil?
+        hosts = Client.new.list_hosts_with_role(role_fullname)
+        @ids = hosts.sort{|a,b| a["name"] <=> b["name"]}.map{|host| host['id']}
+        ObjectCache::write(role_fullname, @ids)
+      end
+      @ids
     end
   end
 end
 
+#puts Mackerel::BulkDashboardMaker.new.bulk_create
 Mackerel::BulkDashboardMaker.new.bulk_create
