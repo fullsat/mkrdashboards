@@ -3,11 +3,7 @@ module Mkrdashboards
     MAX_COLUMN = 24
     attr_reader :row
 
-    def build(y, param)
-    end
-
-    def max_width
-      (MAX_COLUMN / ranges.size).to_i
+    def build(y, ranges, param)
     end
 
     def height
@@ -18,22 +14,13 @@ module Mkrdashboards
       6 #All type adopted
     end
 
-    def make_layout(y, i)
+    def make_layout(y, i, w)
       {
-        "x" => max_width * i,
+        "x" => w * i,
         "y" => y,
         "height" => row_height,
         "width" => 6
       }
-    end
-
-    def ranges
-      @ranges ||= [
-        {},
-        {"type" => "relative", "period" => 21600, "offset" => 0},
-        {"type" => "relative", "period" => 259200, "offset" => 0},
-        {"type" => "relative", "period" => 2592000, "offset" => 0}
-      ]
     end
   end
 end

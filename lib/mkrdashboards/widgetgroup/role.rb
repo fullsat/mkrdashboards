@@ -1,11 +1,12 @@
 module Mkrdashboards
   class Role < WidgetGroup
-    def build(y, param)
+    def build(y, ranges, param)
+      w = ranges.size
       ranges.map.with_index do |range, i|
         _tmp_obj = {
           "type" => "graph",
           "title" => "",
-          "layout" => make_layout(y, i),
+          "layout" => make_layout(y, i, w),
           "graph" => param,
         }
         _tmp_obj['range'] = range unless range.empty?

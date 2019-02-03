@@ -18,6 +18,7 @@ module Mkrdashboards
         req.headers['Content-Type'] = 'application/json'
         req.body = payload
       end
+      is_error(res.status)
       res.body
     end
 
@@ -27,6 +28,7 @@ module Mkrdashboards
         req.headers['X-Api-Key'] = @apikey
         req.headers['Content-Type'] = 'application/json'
       end
+      is_error(res.status)
       res.body
     end
 
@@ -38,6 +40,7 @@ module Mkrdashboards
           req.headers['X-Api-Key'] = @apikey
           req.headers['Content-Type'] = 'application/json'
         end
+        is_error(res.status)
         dashboards = JSON.parse(res.body)
         ObjectCache::write('dashboards', dashboards)
       end
@@ -53,6 +56,7 @@ module Mkrdashboards
           req.headers['Content-Type'] = 'application/json'
           req.params['status'] = ["working", "standby", "maintenance", "poweroff"]
       end
+      is_error(res.status)
 
       hosts = JSON.parse(res.body)
       hosts['hosts'].select! do |host|
@@ -67,6 +71,13 @@ module Mkrdashboards
         builder.use Faraday::Request::UrlEncoded
         builder.use Faraday::Adapter::NetHttp
         builder.options.params_encoder = Faraday::FlatParamsEncoder
+      end
+    end
+
+    def is_error(status)
+      case status
+        when 200..399 then
+        when 400..599 then raise("Is valid APIKEY? or Is Valid AUTHORIZATION")
       end
     end
   end

@@ -1,12 +1,13 @@
 module Mkrdashboards
   class Host < WidgetGroup
-    def build(y, param)
+    def build(y, ranges, param)
+      w = ranges.size
       get_host_ids(param['roleFullname']).map.with_index do |id, i|
         ranges.map.with_index do |range, j|
           _tmp_obj = {
             "type" => "graph",
             "title" => "",
-            "layout" => make_layout(y + HEIGHT * i, j),
+            "layout" => make_layout(y + HEIGHT * i, j, w),
             "graph" => {
               "type" => "host",
               "hostId" => id,
