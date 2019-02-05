@@ -1,3 +1,4 @@
+require 'thor'
 module Mkrdashboards
   class Command < Thor
     desc 'create', 'make a mackerel dashboard'

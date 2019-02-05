@@ -1,6 +1,6 @@
 require "mkrdashboards/version"
 require "mkrdashboards/maker"
-require "mkrdashboards/dashboards"
+require "mkrdashboards/dashboard"
 require "mkrdashboards/objectcache"
 require "mkrdashboards/client"
 require "mkrdashboards/widgetgroup/widgetgroup"
