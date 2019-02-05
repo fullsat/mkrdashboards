@@ -14,7 +14,7 @@ module Mkrdashboards
     def create_dashboard(payload)
       res = connection.post do |req|
         req.url '/api/v0/dashboards'
-        req.headers['X-Api-Key'] = 
+        req.headers['X-Api-Key'] = @apikey
         req.headers['Content-Type'] = 'application/json'
         req.body = payload
       end
@@ -77,7 +77,7 @@ module Mkrdashboards
     def is_error(status)
       case status
         when 200..399 then
-        when 400..599 then raise("Is valid APIKEY? or Is Valid AUTHORIZATION")
+        when 400..599 then raise("Is your APIKEY valid? or Is your authority is valid?")
       end
     end
   end

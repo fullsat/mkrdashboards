@@ -19,7 +19,7 @@ module Mkrdashboards
         "x" => w * i,
         "y" => y,
         "height" => row_height,
-        "width" => 6
+        "width" => w
       }
     end
   end

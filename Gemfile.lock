@@ -4,6 +4,7 @@ PATH
     mkrdashboards (0.1.0)
       dotenv
       faraday
+      json
       thor
 
 GEM
@@ -13,8 +14,9 @@ GEM
     dotenv (2.6.0)
     faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
+    json (2.1.0)
     multipart-post (2.0.0)
-    rake (10.5.0)
+    rake (12.3.2)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -34,10 +36,10 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.16)
+  bundler
   mkrdashboards!
-  rake (~> 10.0)
-  rspec (~> 3.0)
+  rake
+  rspec
 
 BUNDLED WITH
-   1.16.5
+   2.0.1

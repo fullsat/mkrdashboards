@@ -1,7 +1,7 @@
 module Mkrdashboards
   class Header < WidgetGroup
     def build(y, ranges, param)
-      w = ranges.size
+      w = MAX_COLUMN / ranges.size
       param['markdowns'].map.with_index do |mkd, i|
         {
           "type" => "markdown",

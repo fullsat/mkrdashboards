@@ -1,7 +1,7 @@
 module Mkrdashboards
   class Role < WidgetGroup
     def build(y, ranges, param)
-      w = ranges.size
+      w = MAX_COLUMN / ranges.size
       ranges.map.with_index do |range, i|
         _tmp_obj = {
           "type" => "graph",

@@ -18,7 +18,7 @@ module Mkrdashboards
 
       y = 0
       wgf = WidgetGroupFactory.new
-      @widgets = yaml['widget_params'].each do |widgets, param|
+      @widgets = yaml['widget_params'].inject([]) do |widgets, param|
         group = wgf.create(param['type'])
         widgets.concat( group.build(y, @ranges, param) )
         y += group.height
@@ -30,7 +30,7 @@ module Mkrdashboards
 
     def ranges_to_hash(ranges)
       ranges.inject([]) do |_ranges, range|
-        /(\d+)(s|m|h|d|mo|y)/ =~ range
+        /(\d+)(s|m|h|d|mo|y)$/ =~ range
         period = 0
         case $2
         when "s"  then period = $1.to_i
@@ -43,7 +43,7 @@ module Mkrdashboards
           raise("Format Error") if $1.nil?
         end
         _ranges << {
-          "type" => "relative", "period" => period, offset => 0
+          "type" => "relative", "period" => period, "offset" => 0
         }
       end
     end
