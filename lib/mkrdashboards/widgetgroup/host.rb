@@ -1,6 +1,8 @@
 module Mkrdashboards
   class Host < WidgetGroup
     def build(y, ranges, param)
+      validate(param)
+
       w = MAX_COLUMN / ranges.size
       get_host_ids(param['roleFullname']).map.with_index do |id, i|
         ranges.map.with_index do |range, j|
@@ -37,6 +39,10 @@ module Mkrdashboards
         ObjectCache::write(role_fullname, @ids)
       end
       @ids
+    end
+
+    def validate(param)
+      raise("Not found required key") if param['roleFullname'].nil? || param['name'].nil?
     end
   end
 end

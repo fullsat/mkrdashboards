@@ -1,6 +1,8 @@
 module Mkrdashboards
   class Role < WidgetGroup
     def build(y, ranges, param)
+      validate(param)
+
       w = MAX_COLUMN / ranges.size
       ranges.map.with_index do |range, i|
         _tmp_obj = {
@@ -20,5 +22,10 @@ module Mkrdashboards
     def row_height
       6
     end
+
+    def validate(param)
+      raise("Not found required key") if param['roleFullname'].nil? || param['name'].nil?
+    end
+
   end
 end

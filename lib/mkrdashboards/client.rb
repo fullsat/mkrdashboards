@@ -59,11 +59,14 @@ module Mkrdashboards
       is_error(res.status)
 
       hosts = JSON.parse(res.body)
+      return hosts if hosts.empty? # return {}
+
       hosts['hosts'].select! do |host|
         host['roles'].map do |s, roles|
           roles.map{|r| "#{s}:#{r}"}
         end.flatten.include?(role_fullname)
       end
+      hosts['hosts']
     end
 
     def connection

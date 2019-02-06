@@ -6,7 +6,7 @@ module Mkrdashboards
     attr_reader :widgets
 
     def build(yaml)
-      valid(yaml)
+      validate(yaml)
 
       @title   = yaml['title']
       @urlPath = yaml['urlPath']
@@ -26,14 +26,13 @@ module Mkrdashboards
       self.to_json
     end
 
-    def valid(yaml)
+    def validate(yaml)
       no_required_params = yaml['title'].nil? || yaml['urlPath'].nil? || yaml['widget_params'].nil?
       raise("NOT a valid format error") if no_required_params
     end
 
     def ranges_to_hash(ranges)
       return default_ranges if ranges.nil?
-      puts ranges
 
       ranges.inject([]) do |_ranges, range|
         if range == "nil"
