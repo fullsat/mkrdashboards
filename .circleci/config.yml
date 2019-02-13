@@ -9,3 +9,8 @@ jobs:
     steps:
       - checkout
       - run: ls -l
+workflows:
+  version: 2.1
+  test-with-many-versions:
+    jobs:
+      - test-on-ruby19
