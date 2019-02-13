@@ -3,11 +3,9 @@ executors:
   ruby19:
     docker:
       - image: ruby:1.9.3
-workflows:
-  jobs:
-    test-on-ruby19:
-      executor: ruby19
-      steps:
-        - checkout
-        - run: ls -l
-
+jobs:
+  test-on-ruby19:
+    executor: ruby19
+    steps:
+      - checkout
+      - run: ls -l
