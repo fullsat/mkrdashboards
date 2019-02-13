@@ -60,9 +60,9 @@ module Mkrdashboards
     def default_ranges
       [
         {},
-        {"type" => "relative", "period" => 21600, "offset" => 0},
+        {"type" => "relative", "period" => 43200, "offset" => 0},
         {"type" => "relative", "period" => 259200, "offset" => 0},
-        {"type" => "relative", "period" => 2592000, "offset" => 0}
+        {"type" => "relative", "period" => 7776000, "offset" => 0}
       ]
     end
 
