@@ -11,29 +11,29 @@ RSpec.describe Mkrdashboards::Host do
     { "hosts" => 
       [
         {
-          "id": "3x1mrnrn1Z9",
-          "name": "rinze",
-          "status": "working",
-          "isRetired": false,
-          "createdAt": "2019-02-03T15:19:10+09:00",
-          "roles": {
-            "tsubasa": [ "web", "plove"]
+          "id" => "3x1mrnrn1Z9",
+          "name" => "rinze",
+          "status" => "working",
+          "isRetired" => false,
+          "createdAt" => "2019-02-03T15:19:10+09:00",
+          "roles" => {
+            "tsubasa" => [ "web", "plove"]
           },
-          "ipAddresses": {
-            "wlp3s0": "10.0.10.19"
+          "ipAddresses" => {
+            "wlp3s0" => "10.0.10.19"
           }
         },
         {
-          "id": "3y9Chlgu4xs",
-          "name": "kaho",
-          "status": "working",
-          "isRetired": false,
-          "createdAt": "2019-02-03T15:19:10+09:00",
-          "roles": {
-            "tsubasa": [ "web", "genki"]
+          "id" => "3y9Chlgu4xs",
+          "name" => "kaho",
+          "status" => "working",
+          "isRetired" => false,
+          "createdAt" => "2019-02-03T15:19:10+09:00",
+          "roles" => {
+            "tsubasa" => [ "web", "genki"]
           },
-          "ipAddresses": {
-            "wlp3s0": "10.0.7.29"
+          "ipAddresses" => {
+            "wlp3s0" => "10.0.7.29"
           }
         }
       ]
