@@ -1,0 +1,38 @@
+title: えびばでぃれっつごー
+urlPath: after_school_climax
+memo: 放課後いえーいいえーい
+ranges:
+  - nil
+  - 6h 
+  - 3d
+  - 1mo
+widget_params:
+  - type: header
+    markdowns:
+        - 放課後
+        - 6時間前から放課後まで
+        - 3日間前から放課後まで
+        - 1ヶ月前から放課後まで
+  - type: role
+    roleFullname: lab:web
+    name: custom.multicore.loadavg_per_core.loadavg5
+    isStacked: false
+  - type: host
+    roleFullname: lab:web
+    name: memory
+  - type: host
+    roleFullname: lab:web
+    name: disk
+  - type: role
+    roleFullname: lab:elb
+    name: custom.alb.request.count
+  - type: role
+    roleFullname: lab:elb
+    name: custom.alb.httpcode_count.alb_5xx
+  - type: host
+    roleFullname: lab:web
+    name: custom.ec2.network.*
+  - type: host
+    roleFullname: lab:web
+    name: custom.linux.ss.*
+
