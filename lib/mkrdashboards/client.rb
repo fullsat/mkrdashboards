@@ -50,15 +50,7 @@ module Mkrdashboards
     end
 
     def list_hosts_with_role(role_fullname)
-      res = connection.get do |req|
-          req.url '/api/v0/hosts'
-          req.headers['X-Api-Key'] = @apikey
-          req.headers['Content-Type'] = 'application/json'
-          req.params['status'] = ["working", "standby", "maintenance", "poweroff"]
-      end
-      is_error(res.status)
-
-      hosts = JSON.parse(res.body)
+      hosts = list_hosts
       return hosts if hosts.empty? # return {}
 
       hosts['hosts'].select! do |host|
@@ -66,6 +58,14 @@ module Mkrdashboards
           roles.map{|r| "#{s}:#{r}"}
         end.flatten.include?(role_fullname)
       end
+      hosts['hosts']
+    end
+
+    def list_hosts_with_name(search_word)
+      hosts = list_hosts
+      return hosts if hosts.empty? # return {}
+
+      hosts['hosts'].select!{|h| h['name'] == search_word}
       hosts['hosts']
     end
 
@@ -80,8 +80,22 @@ module Mkrdashboards
     def is_error(status)
       case status
         when 200..399 then
-        when 400..599 then raise("Is your APIKEY valid? or Is your authority is valid?")
+        when 400..599 then raise("Is your APIKEY valid? or Is your authority is valid? or Invalid Parameters")
       end
+    end
+
+    private
+    def list_hosts
+      res = connection.get do |req|
+          req.url '/api/v0/hosts'
+          req.headers['X-Api-Key'] = @apikey
+          req.headers['Content-Type'] = 'application/json'
+          req.params['status'] = ["working", "standby", "maintenance", "poweroff"]
+      end
+      is_error(res.status)
+
+      hosts = JSON.parse(res.body)
+      hosts
     end
   end
 end

@@ -76,6 +76,13 @@ RSpec.describe Mkrdashboards::Host do
       "name" => "filesystem"
     }
   }
+  let(:good_params_with_hostname) {
+    {
+      "type" => "host",
+      "hostname" => "kaho",
+      "name" => "filesystem"
+    }
+  }
   let(:host) { Mkrdashboards::Host.new }
   let(:expect_value) {
     [
@@ -169,6 +176,53 @@ RSpec.describe Mkrdashboards::Host do
       }
     ]
   }
+  let(:expect_value_with_hostname) {
+    [
+      {
+        "type" => "graph",
+        "title" => "",
+        "layout" => {"x" => 0, "y" => 0, "height" => 6, "width" => 6},
+        "graph" => {
+          "type" => "host",
+          "hostId" => "3y9Chlgu4xs",
+          "name" => "filesystem"
+        }
+      },
+      {
+        "type" => "graph",
+        "title" => "",
+        "layout" => {"x" => 6, "y" => 0, "height" => 6, "width" => 6},
+        "range" => {"type" => "relative", "period" => 21600, "offset" => 0},
+        "graph" => {
+          "type" => "host",
+          "hostId" => "3y9Chlgu4xs",
+          "name" => "filesystem"
+        }
+      },
+      {
+        "type" => "graph",
+        "title" => "",
+        "layout" => {"x" => 12, "y" => 0, "height" => 6, "width" => 6},
+        "range" => {"type" => "relative", "period" => 259200, "offset" => 0},
+        "graph" => {
+          "type" => "host",
+          "hostId" => "3y9Chlgu4xs",
+          "name" => "filesystem"
+        }
+      },
+      {
+        "type" => "graph",
+        "title" => "",
+        "layout" => {"x" => 18, "y" => 0, "height" => 6, "width" => 6},
+        "range" => {"type" => "relative", "period" => 2592000, "offset" => 0},
+        "graph" => {
+          "type" => "host",
+          "hostId" => "3y9Chlgu4xs",
+          "name" => "filesystem"
+        }
+      }
+    ]
+  }
 
   it "return greater than 6" do
     expect(host.row_height).to be >= 6
@@ -176,15 +230,19 @@ RSpec.describe Mkrdashboards::Host do
 
   it "can not calculate total height because does not know hosts" do
     expect{ host.height }.to raise_error("Please call after #get_host_ids")
-    
   end
 
-  it "builds valid hash_object" do
+  it "builds a valid hash_object" do
     allow_any_instance_of(Mkrdashboards::Client).to receive(:connection).and_return(hosts_con)
     expect( host.build(y, ranges, good_params) ).to eq(expect_value)
   end
 
-  it "raise exception" do
+  it "raise a exception" do
     expect{ host.build(y, ranges, bad_params) }.to raise_error("Not found required key")
+  end
+
+  it "builds a valid hash_object when it provides a hostname parameter instead of rollFullname" do
+    allow_any_instance_of(Mkrdashboards::Client).to receive(:connection).and_return(hosts_con)
+    expect( host.build(y, ranges, good_params_with_hostname) ).to eq(expect_value_with_hostname)
   end
 end

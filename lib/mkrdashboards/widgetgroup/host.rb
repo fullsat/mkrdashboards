@@ -2,9 +2,13 @@ module Mkrdashboards
   class Host < WidgetGroup
     def build(y, ranges, param)
       validate(param)
+      return build_with_condition( y, ranges, param['roleFullname'], param['name'], method(:get_host_ids_with_role) ) unless param['roleFullname'].nil?
+      return build_with_condition( y, ranges, param['hostname'], param['name'], method(:get_host_ids_with_name) ) unless param['hostname'].nil?
+    end
 
+    def build_with_condition(y, ranges, search_words, name,  host_ids_get_method)
       w = MAX_COLUMN / ranges.size
-      get_host_ids(param['roleFullname']).map.with_index do |id, i|
+      host_ids_get_method.call(search_words).map.with_index do |id, i|
         ranges.map.with_index do |range, j|
           _tmp_obj = {
             "type" => "graph",
@@ -13,7 +17,7 @@ module Mkrdashboards
             "graph" => {
               "type" => "host",
               "hostId" => id,
-              "name" => param["name"]
+              "name" => name
             }
           }
           _tmp_obj['range'] = range unless range.empty?
@@ -31,18 +35,28 @@ module Mkrdashboards
       HEIGHT
     end
 
-    def get_host_ids(role_fullname)
-      @ids = ObjectCache::read(role_fullname)
+    def get_host_ids_with_role(role)
+      @ids = ObjectCache::read(role)
       if @ids.nil?
-        hosts = Client.new.list_hosts_with_role(role_fullname)
+        hosts = Client.new.list_hosts_with_role(role)
         @ids = hosts.sort{|a,b| a["name"] <=> b["name"]}.map{|host| host['id']}
-        ObjectCache::write(role_fullname, @ids)
+        ObjectCache::write(role, @ids)
+      end
+      @ids
+    end
+
+    def get_host_ids_with_name(hostname)
+      @ids = ObjectCache::read(hostname)
+      if @ids.nil?
+        hosts = Client.new.list_hosts_with_name(hostname)
+        @ids = hosts.sort{|a,b| a["name"] <=> b["name"]}.map{|host| host['id']}
+        ObjectCache::write(hostname, @ids)
       end
       @ids
     end
 
     def validate(param)
-      raise("Not found required key") if param['roleFullname'].nil? || param['name'].nil?
+      raise("Not found required key") if (param['roleFullname'].nil? && param['hostname'].nil?) || param['name'].nil?
     end
   end
 end
